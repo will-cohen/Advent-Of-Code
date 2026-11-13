@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: aoc
+      POSTGRES_PASSWORD: aoc
+      POSTGRES_DB: aoc2025
+    volumes:
+      - postgres-data:/var/lib/postgresql
+      - .:/aoc:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aoc -d aoc2025"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  postgres-data:
