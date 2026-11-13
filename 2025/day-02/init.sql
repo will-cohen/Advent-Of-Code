@@ -30,5 +30,7 @@ SELECT
     split_part(range_text, '-', 2)::bigint AS last_id
 FROM day_02.raw
 -- Split each input line into ranges; ordinality keeps each range's input order.
+-- LATERAL lets the splitter use each raw row's ranges text and emits one
+-- result row for each comma-separated range.
 CROSS JOIN LATERAL string_to_table(raw.ranges, ',')
     WITH ORDINALITY AS input_ranges(range_text, range_no);

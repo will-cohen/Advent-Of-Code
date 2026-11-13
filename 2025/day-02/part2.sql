@@ -6,6 +6,8 @@ WITH block_lengths AS (
         block_length,
         power(10::numeric, block_length) AS place_value
     FROM day_02.ranges AS ranges
+    -- For each range, generate block widths that can repeat at least twice
+    -- within the number of digits in its upper bound.
     CROSS JOIN LATERAL generate_series(
         1,
         length(ranges.last_id::text) / 2
@@ -21,6 +23,8 @@ patterns AS (
             block_lengths.place_value - 1
         ) AS multiplier
     FROM block_lengths
+    -- For each block width and range, generate every feasible repeat count,
+    -- from twice up to the number of blocks that fit in the upper bound.
     CROSS JOIN LATERAL generate_series(
         2,
         length(block_lengths.last_id::text) / block_lengths.block_length
@@ -30,6 +34,8 @@ invalid_ids AS (
     -- An ID can match several patterns (1111 is both 1 x 4 and 11 x 2).
     SELECT DISTINCT blocks.block * patterns.multiplier AS id
     FROM patterns
+    -- For each repeated-pattern multiplier, generate the base blocks whose
+    -- resulting IDs fall within the input range.
     CROSS JOIN LATERAL generate_series(
         GREATEST(
             div(patterns.first_id + patterns.multiplier - 1, patterns.multiplier)::bigint,
