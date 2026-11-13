@@ -9,8 +9,8 @@ year/
    day/
       readme.md - problem specification
       init.sql  - initializes the database, load data sets 
-      part1.dat - part 1 data set
-      part2.dat - part 2 data set
+      example.dat - small example data set
+      data-set.dat - real data set (do not commit)
 
 # Developer Experience
 
