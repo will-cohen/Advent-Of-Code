@@ -1,0 +1,45 @@
+-- Day 2, Part 2: sum the IDs made of a digit sequence repeated at least twice.
+WITH block_lengths AS (
+    SELECT
+        ranges.first_id,
+        ranges.last_id,
+        block_length,
+        power(10::numeric, block_length) AS place_value
+    FROM day_02.ranges AS ranges
+    CROSS JOIN LATERAL generate_series(
+        1,
+        length(ranges.last_id::text) / 2
+    ) AS lengths(block_length)
+),
+patterns AS (
+    SELECT
+        block_lengths.*,
+        -- For a two-digit block repeated three times, the multiplier is
+        -- (10^6 - 1) / (10^2 - 1) = 10101, so 12 becomes 121212.
+        div(
+            power(10::numeric, block_lengths.block_length * repeat_count) - 1,
+            block_lengths.place_value - 1
+        ) AS multiplier
+    FROM block_lengths
+    CROSS JOIN LATERAL generate_series(
+        2,
+        length(block_lengths.last_id::text) / block_lengths.block_length
+    ) AS repeats(repeat_count)
+),
+invalid_ids AS (
+    -- An ID can match several patterns (1111 is both 1 x 4 and 11 x 2).
+    SELECT DISTINCT blocks.block * patterns.multiplier AS id
+    FROM patterns
+    CROSS JOIN LATERAL generate_series(
+        GREATEST(
+            div(patterns.first_id + patterns.multiplier - 1, patterns.multiplier)::bigint,
+            power(10::numeric, patterns.block_length - 1)::bigint
+        ),
+        LEAST(
+            div(patterns.last_id, patterns.multiplier)::bigint,
+            (patterns.place_value - 1)::bigint
+        )
+    ) AS blocks(block)
+)
+SELECT COALESCE(SUM(id), 0) AS password
+FROM invalid_ids;

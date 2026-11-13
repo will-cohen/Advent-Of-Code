@@ -29,5 +29,6 @@ SELECT
     split_part(range_text, '-', 1)::bigint AS first_id,
     split_part(range_text, '-', 2)::bigint AS last_id
 FROM day_02.raw
+-- Split each input line into ranges; ordinality keeps each range's input order.
 CROSS JOIN LATERAL string_to_table(raw.ranges, ',')
     WITH ORDINALITY AS input_ranges(range_text, range_no);
