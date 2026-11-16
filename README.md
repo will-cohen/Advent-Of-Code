@@ -17,6 +17,28 @@ Makefile                    # Root shortcuts; defaults to YEAR=2025
     data-set.dat            # Your puzzle input; ignored by Git
 ```
 
+# SQL Language Features
+
+* **`CROSS JOIN`** combines every row from its left input with every row from
+  its right input (a Cartesian product). Use it when every pairing is
+  meaningful, such as combining each current selection state with the
+  candidates generated for it.
+* **`LATERAL` join** lets a subquery in the `FROM` clause refer to columns from
+  an earlier `FROM` item. PostgreSQL evaluates that subquery for each preceding
+  row, which is useful when the rows to generate or inspect depend on the
+  current input row. In [Day 3, Part 1](2025/day-03/part1.sql), for example,
+  the lateral subquery searches positions based on the bank and selection state.
+* **Recursive CTE** (`WITH RECURSIVE`) defines a query in terms of its own
+  results. It starts with an initial (anchor) query, repeatedly applies a
+  recursive query to the rows found so far, and stops when an iteration
+  produces no more rows. Use it for step-by-step processes such as traversing
+  hierarchies or building a result incrementally; make sure each step moves
+  toward a clear stopping condition.
+* **`generate_series`** is a PostgreSQL set-returning function that creates one
+  row per value in a sequence, such as a range of integers. Use it to turn
+  positions or numeric ranges into rows that can be filtered, joined, and
+  ordered. Day 3 uses it to enumerate eligible character positions in a bank.
+
 # Developer Experience
 
 ## docker-compose
@@ -79,3 +101,5 @@ default input and opens a SQL shell with that day's schema in the search path.
 Database data persists in a Docker volume across `make down` / `make up`.
 To deliberately delete the 2025 database, run
 `docker compose -f 2025/docker-compose.yml down --volumes` from the root.
+
+
