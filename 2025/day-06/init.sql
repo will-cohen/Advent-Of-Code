@@ -32,3 +32,21 @@ SELECT
 FROM day_06.raw AS raw
 CROSS JOIN LATERAL regexp_split_to_table(btrim(raw.row_text, ' '), ' +')
     WITH ORDINALITY AS fields(contents, col_no);
+
+-- Expand every row to the worksheet's full character width, padding short
+-- rows with spaces so blank separator columns are visible.
+CREATE VIEW day_06.characters AS
+WITH worksheet_width AS (
+    -- Find the rightmost character present in any input row.
+    SELECT MAX(char_length(row_text)) AS width
+    FROM day_06.raw
+)
+SELECT
+    raw.row_no,
+    positions.col_no,
+    COALESCE(NULLIF(substr(raw.row_text, positions.col_no, 1), ''), ' ')
+        AS contents
+FROM day_06.raw AS raw
+CROSS JOIN worksheet_width
+CROSS JOIN LATERAL generate_series(1, worksheet_width.width)
+    AS positions(col_no);
